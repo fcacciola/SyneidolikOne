@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Intuition Trainer v1.0</title>
+  <title>Syneidolik One - by Varanormal</title>
 </head>
 <style>
 
@@ -16,15 +16,15 @@
 .bar
 {
   position: absolute;
-  left: 5px;
-  bottom: 5px;
-  height: 250px;
-  width: 1000px;
+  top: 120px;
+  left: 530px;
+  right: 5px;
+  height: 900px;
 }
 
 .hint_box {
   height: 400px;
-  width: 400px;
+  width: 510px;
   margin-bottom: 15px;
   border: 1px solid black;
 }
@@ -42,42 +42,81 @@
 </head>
 <body>
 
+<canvas id="micro_image" style="position:fixed; top: 2px; right: 1px; width: 9; height: 9"></canvas>
+
+<h1>Syneidolik One - by <a href="https://www.varanormal.com/" target="_blank">Varanormal Research Team.</a></h1>
+
+<button class="button" onclick="help_0()">FIRST TIME INSTRUCTIONS</button>
 <button class="button" onclick="start_choosing()">Start</button>
 <button class="button" onclick="show_grids()">Show</button>
+<button class="button" onclick="reset()">Reset</button>
 
 <div>
   <div class="cell" id="a00"></div>
   <div class="cell" id="a01"></div>
   <div class="cell" id="a02"></div>
+  <div class="cell" id="a03"></div>
+  <div class="cell" id="a04"></div>
   <div class="cell" id="a10"></div>
   <div class="cell" id="a11"></div>
   <div class="cell" id="a12"></div>
+  <div class="cell" id="a13"></div>
+  <div class="cell" id="a14"></div>
   <div class="cell" id="a20"></div>
   <div class="cell" id="a21"></div>
   <div class="cell" id="a22"></div>
+  <div class="cell" id="a23"></div>
+  <div class="cell" id="a24"></div>
+  <div class="cell" id="a30"></div>
+  <div class="cell" id="a31"></div>
+  <div class="cell" id="a32"></div>
+  <div class="cell" id="a33"></div>
+  <div class="cell" id="a34"></div>
+  <div class="cell" id="a40"></div>
+  <div class="cell" id="a41"></div>
+  <div class="cell" id="a42"></div>
+  <div class="cell" id="a43"></div>
+  <div class="cell" id="a44"></div>
 </div>
 
 <div>
   <div class="cell" id="b00"></div>
   <div class="cell" id="b01"></div>
   <div class="cell" id="b02"></div>
+  <div class="cell" id="b03"></div>
+  <div class="cell" id="b04"></div>
   <div class="cell" id="b10"></div>
   <div class="cell" id="b11"></div>
   <div class="cell" id="b12"></div>
+  <div class="cell" id="b13"></div>
+  <div class="cell" id="b14"></div>
   <div class="cell" id="b20"></div>
   <div class="cell" id="b21"></div>
   <div class="cell" id="b22"></div>
+  <div class="cell" id="b23"></div>
+  <div class="cell" id="b24"></div>
+  <div class="cell" id="b30"></div>
+  <div class="cell" id="b31"></div>
+  <div class="cell" id="b32"></div>
+  <div class="cell" id="b33"></div>
+  <div class="cell" id="b34"></div>
+  <div class="cell" id="b40"></div>
+  <div class="cell" id="b41"></div>
+  <div class="cell" id="b42"></div>
+  <div class="cell" id="b43"></div>
+  <div class="cell" id="b44"></div>
 </div>
 
-<canvas id="micro_image" style="position:absolute; top:50px; left:7px"></canvas>
-
-<p style="position:absolute; top: 300px" id="score">Score:</p>
-
-<div style="position:absolute; top: 400px">
+<div style="position:absolute; top: 370px">
   <canvas id="aca" class="hint_box"></canvas>
+</div>
+
+<div style="position:absolute; top: 780px">
   <button class="button choice_box white" onclick="set_next_cell_as_white()">WHITE</button>
   <button class="button choice_box black" onclick="set_next_cell_as_black()">BLACK</button>
 </div>
+
+<p style="position:absolute; top: 980px" id="score">Score: 0 points (+1/-1 for each correct/incorrect color).</p>
 
 <textarea class="bar" id="info"></textarea>
 
