@@ -224,66 +224,73 @@ class MyPerlin {
     this.blue = Array(this.ncol).fill(1)
 		this.scale = 0.8 // between preview and analysis canvas
 
-		this.parameters['luminosity'] = Array(this.ncolmax).fill([1.3,0.9,0.5,0.3,0.2,0.1,0.1,0.1,0.35,0.35])
-		this.parameters['contrast'] = Array(this.ncolmax).fill([3.2,3.2,3.2,3.2,3.2,3.2,3.2,2.2,0.35,0.35])
-		this.parameters['threshold'] = Array(this.ncolmax).fill([0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.35])
+		this.parameters['luminosity'] = Array(this.ncol).fill([1.3,0.9,0.5,0.3,0.2,0.1,0.1,0.1,0.35,0.35])
+		this.parameters['contrast'] = Array(this.ncol).fill([3.2,3.2,3.2,3.2,3.2,3.2,3.2,2.2,0.35,0.35])
+		this.parameters['threshold'] = Array(this.ncol).fill([0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.35])
 		this.red = [0.6,0.9,0.2,0.8,0.5,0.2,0.8,0.5,0.2,0.8,0.5,0.2]
 		this.green = [0.7,0.8,0.4,0.8,0.5,0.2,0.8,0.5,0.2,0.8,0.5,0.2]
 		this.blue = [1,0.5,0.5,0.8,0.5,0.2,0.8,0.5,0.2,0.8,0.5,0.2]
 		this.octave = [6,6,5,3,3,3,3,3,3,3,3]
     this.Keith_parameters = "3;3140;6,6,6,3,3,3,3,3,3,3,3;1.5,1.5,1.5,1,1,1;0,0,0,0,0,0;.6,.9,0.2,0.8,0.5,0.2,0.8,0.5,0.2,0.8,0.5,0.2;0.7,.8,0.4,0.8,0.5,0.2,0.8,0.5,0.2,0.8,0.5,0.2;1,.5,0.5,0.8,0.5,0.2,0.8,0.5,0.2,0.8,0.5,0.2;1.3,0.9,0.5,0.3,0.2,0.1,0.1,0.1,0.35,0.35;1.3,0.9,0.5,0.3,0.2,0.1,0.1,0.1,0.35,0.35;1.3,0.9,0.5,0.3,0.2,0.1,0.1,0.1,0.35,0.35;2.9,2.9,2.9,2.9,2.9,2.9,3.2,2.2,0.35,0.35;2.9,2.9,2.9,2.9,2.9,2.9,3.2,2.2,0.35,0.35;2.9,2.9,2.9,2.9,2.9,2.9,3.2,2.2,0.35,0.35;0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.35;0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.35;0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.35"
 	}
+
+	contrast_fun(val,contr,thr,a,b) {
+		var ex = Math.exp((thr-val)/contr)
+		return a*(1/(1+ex) -1/2)+b
+	}
+
+    drawFrame() 
+    {
+        const grid = []
+        var perlus = []
+        var canvas = document.getElementById("perlin_cva")
+        const context = canvas.getContext("2d");
+        const imageData = context.createImageData(this.width, this.height);
+        for (let col=0; col<this.ncol; ++col) {
+            var shift = 0
+            grid.push(new Grid(this.width,this.height))
+            grid[col].fill(0);
+            for(let i = 0; i < this.octave[col]; ++i){
+                var contr = Math.pow(10,3-this.parameters['contrast'][col][i])
+                var thr = this.parameters['threshold'][col][i]
+                var ex1 = Math.exp(thr/contr)
+                var ex2 = Math.exp((thr-1)/contr)
+                var a = 1/(1/(1+ex2)-1/(1+ex1))
+                var b = a*(1/2 -1/(1+ex1))
+    
+    
+                const factor = Math.pow(2,i)
+                var zoom = 0.18 //Math.max(this.zoom[col],0.18)
+                var perluss = new Perlin(20 * factor, 20 * factor,Math.floor(zoom* 200 / factor))
+                for(let y = 0; y < grid[col].height; ++y){
+                    for(let x = 0; x < grid[col].width; ++x){
+                        var value = perluss.get(x, y) * this.parameters['luminosity'][col][i]
+                        if (true || this.params_changed) {
+                            if (value < this.mins[col,i]) { this.mins[col,i] = value }
+                            if (value > this.maxs[col,i]) { this.maxs[col,i] = value }
+                        }
+                        var val = (value-this.mins[col,i])/(this.maxs[col,i]-this.mins[col,i]+0.001) 
+                        var vall = (this.maxs[col,i]-this.mins[col,i])*this.contrast_fun(val,contr,thr,a,b)+this.mins[col,i]
+                        grid[col].values[grid[col].indexOf(x, y)] += -vall*255
+                    }
+                }
+            }
+        }
+        for (let col=0; col<this.ncol; ++col) {
+            for(let y = 0; y < grid[0].height; ++y){
+                for(let x = 0; x < grid[0].width; ++x){
+                    let val = grid[col].get(x, y)
+                    let n = grid[0].indexOf(x, y) * 4;
+                    imageData.data[n++] += this.red[col] *val + shift
+                    imageData.data[n++] += this.green[col] *val + shift
+                    imageData.data[n++] += this.blue[col] *val + shift
+                    imageData.data[n] += 255 + shift
+                }
+            }
+        }
+        context.putImageData(imageData, 0, 0);
+    }
 }
 
-function drawFrame() 
-{
-	const grid = []
-	var perlus = []
-	var canvas = document.getElementById("perlin_cva")
-	const context = canvas.getContext("2d");
-	const imageData = context.createImageData(perlin.width, perlin.height);
-	for (let col=0; col<perlin.ncol; ++col) {
-		var shift = 0
-		grid.push(new Grid(perlin.width,perlin.height))
-		grid[col].fill(0);
-		for(let i = 0; i < perlin.octave[col]; ++i){
-			var contr = Math.pow(10,3-perlin.parameters['contrast'][col][i])
-			var thr = perlin.parameters['threshold'][col][i]
-			var ex1 = Math.exp(thr/contr)
-			var ex2 = Math.exp((thr-1)/contr)
-			var a = 1/(1/(1+ex2)-1/(1+ex1))
-			var b = a*(1/2 -1/(1+ex1))
 
-
-			const factor = Math.pow(2,i)
-			var zoom = 0.18 //Math.max(perlin.zoom[col],0.18)
-			var perluss = new Perlin(20 * factor, 20 * factor,Math.floor(zoom* 200 / factor))
-			for(let y = 0; y < grid[col].height; ++y){
-				for(let x = 0; x < grid[col].width; ++x){
-					var value = perluss.get(x, y) * perlin.parameters['luminosity'][col][i]
-					if (true || perlin.params_changed) {
-						if (value < perlin.mins[col,i]) { perlin.mins[col,i] = value }
-						if (value > perlin.maxs[col,i]) { perlin.maxs[col,i] = value }
-					}
-					var val = (value-perlin.mins[col,i])/(perlin.maxs[col,i]-perlin.mins[col,i]+0.001) 
-					var vall = (perlin.maxs[col,i]-perlin.mins[col,i])*perlin.contrast_fun(val,contr,thr,a,b)+perlin.mins[col,i]
-					grid[col].values[grid[col].indexOf(x, y)] += -vall*255
-				}
-			}
-		}
-	}
-	for (let col=0; col<perlin.ncol; ++col) {
-		for(let y = 0; y < grid[0].height; ++y){
-			for(let x = 0; x < grid[0].width; ++x){
-				let val = grid[col].get(x, y)
-				let n = grid[0].indexOf(x, y) * 4;
-				imageData.data[n++] += perlin.red[col] *val + shift
-				imageData.data[n++] += perlin.green[col] *val + shift
-				imageData.data[n++] += perlin.blue[col] *val + shift
-				imageData.data[n] += 255 + shift
-			}
-		}
-	}
-	context.putImageData(imageData, 0, 0);
-}
 

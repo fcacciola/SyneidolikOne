@@ -19,7 +19,9 @@ class SyneidolikOne
                             "cyan", "cyan" ,"cyan", "cyan" ,"cyan", 
                           ] ,
                         }
-}
+
+    this.perlin = new MyPerlin();
+  }
 
   resetInfo()
   {
@@ -272,6 +274,8 @@ class SyneidolikOne
   
   setup_hint_image()
   {
+
+    this.perlin.drawFrame()
     // const canvas = document.getElementById('perlin_box');
     // const ctx = canvas.getContext('2d');  
     
